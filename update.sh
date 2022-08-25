@@ -86,6 +86,15 @@ main() {
     local script_update
 
     # Install package
+    if [[ "${FORCE_UPDATE}" == true ]]; then
+        chown -R root:root ${PIKONEK_LOCAL_REPO}
+        update_repo "${PIKONEK_SCRIPT_DIR}" ${PIKONEK_SCRIPTS_GIT_URL} || { echo -e "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+        update_repo "${PIKONEK_FILES_DIR}" ${PIKONEK_GIT_URL} || { echo -e "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+        ${PIKONEK_SCRIPT_DIR}/install.sh --update || \
+            echo -e "${basicError}" && exit 1
+        exit 0
+    fi
+
     install_dependent_packages "${INSTALLER_DEPS[@]}"
 
     # This is unlikely
@@ -156,6 +165,10 @@ main() {
 
 if [[ "$1" == "--check-only" ]]; then
     CHECK_ONLY=true
+fi
+
+if [[ "$1" == "--force" ]]; then
+    FORCE_UPDATE=true
 fi
 
 main
