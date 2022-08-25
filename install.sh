@@ -2597,8 +2597,8 @@ main() {
 
     # Get version
     printf "  %b Checking version...\\n" "${INFO}"
-    # /etc/.pikonek/updatecheck.sh
-    # /etc/.pikonek/updatecheck.sh x remote
+    /etc/.pikonek/updatecheck.sh
+    /etc/.pikonek/updatecheck.sh x remote
     printf "  %b Checking version...\\n" "${TICK}"
 
     if [[ "${useUpdate}" == false ]]; then
