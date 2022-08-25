@@ -375,7 +375,7 @@ update_repo() {
     printf "  %b %s...\\n" "${INFO}" "${str}"
     # Stash any local commits as they conflict with our working code
     git stash --quiet &> /dev/null || true # Okay for stash failure
-    git clean --quiet --force -d || true # Okay for already clean directory
+    # git clean --quiet --force -d || true # Okay for already clean directory
     # Pull the latest commits
     git pull --quiet &> /dev/null || return $?
     # Check current branch. If it is master, then reset to the latest available tag.
