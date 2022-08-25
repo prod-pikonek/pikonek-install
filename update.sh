@@ -87,7 +87,7 @@ main() {
 
     # Install package
     if [[ "${FORCE_UPDATE}" == true ]]; then
-        chown -R root:root ${PIKONEK_LOCAL_REPO}
+        chown -R root:root ${PIKONEK_FILES_DIR}
         update_repo "${PIKONEK_SCRIPT_DIR}" ${PIKONEK_SCRIPTS_GIT_URL} || { echo -e "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
         update_repo "${PIKONEK_FILES_DIR}" ${PIKONEK_GIT_URL} || { echo -e "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
         ${PIKONEK_SCRIPT_DIR}/install.sh --update || \
