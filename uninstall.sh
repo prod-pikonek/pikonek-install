@@ -126,6 +126,7 @@ removeNoPurge() {
     ${SUDO} rm -f /etc/systemd/network/25* &> /dev/null
     ${SUDO} rm -f /etc/systemd/network/99* &> /dev/null
     ${SUDO} rm -f /etc/logrotate.d/pikonek &> /dev/null
+    ${SUDO} rm -f /etc/network/interfaces &> /dev/null
     ${SUDO} rm -f /etc/wpa_supplicant/wpa_supplicant* &> /dev/null
     echo -e "  ${TICK} Removed config files"
 
