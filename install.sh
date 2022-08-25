@@ -371,8 +371,6 @@ update_repo() {
     local str="Update repo in ${1}"
     # Move into the directory that was passed as an argument
     pushd "${directory}" &> /dev/null || return 1
-    git config --global --add safe.directory "${directory}"
-    git config --global --add safe.directory "${directory}"
     # Let the user know what's happening
     printf "  %b %s...\\n" "${INFO}" "${str}"
     # Stash any local commits as they conflict with our working code
@@ -2521,6 +2519,7 @@ main() {
 
     # Update repos
     if [[ "${useUpdate}" == true ]]; then
+        chown -R root:root ${PIKONEK_LOCAL_REPO}
         update_repo "${PIKONEK_INSTALL_DIR}" ${pikonekScriptGitUrl} || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
         update_repo "${PIKONEK_LOCAL_REPO}" ${pikonekGitUrl} || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
     fi
@@ -2603,11 +2602,21 @@ main() {
     # Configure captive portal
     configureCaptivePortalRule
 
+    # change back to root
+    if [[ "${useUpdate}" == true ]]; then
+        chown -R root:root ${PIKONEK_LOCAL_REPO}
+    fi
+
     # Get version
     printf "  %b Checking version...\\n" "${INFO}"
     /etc/.pikonek/updatecheck.sh
     /etc/.pikonek/updatecheck.sh x remote
     printf "  %b Checking version...\\n" "${TICK}"
+
+    # change back to pikonek
+    if [[ "${useUpdate}" == true ]]; then
+        chown -R pikonek:pikonek ${PIKONEK_LOCAL_REPO}
+    fi
 
     if [[ "${useUpdate}" == false ]]; then
         # Disable predictable names
