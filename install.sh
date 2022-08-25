@@ -371,6 +371,8 @@ update_repo() {
     local str="Update repo in ${1}"
     # Move into the directory that was passed as an argument
     pushd "${directory}" &> /dev/null || return 1
+    git config --global --add safe.directory "${directory}"
+    git config --global --add safe.directory "${directory}"
     # Let the user know what's happening
     printf "  %b %s...\\n" "${INFO}" "${str}"
     # Stash any local commits as they conflict with our working code
