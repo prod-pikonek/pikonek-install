@@ -374,16 +374,16 @@ update_repo() {
     # Let the user know what's happening
     printf "  %b %s...\\n" "${INFO}" "${str}"
     # Stash any local commits as they conflict with our working code
-    # git stash --quiet &> /dev/null || true # Okay for stash failure
-    # git clean --quiet --force -d || true # Okay for already clean directory
+    git stash --quiet &> /dev/null || true # Okay for stash failure
+    git clean --quiet --force -d || true # Okay for already clean directory
     # Pull the latest commits
     git pull --quiet &> /dev/null || return $?
     # Check current branch. If it is master, then reset to the latest available tag.
     # In case extra commits have been added after tagging/release (i.e in case of metadata updates/README.MD tweaks)
-    # curBranch=$(git rev-parse --abbrev-ref HEAD)
-    # if [[ "${curBranch}" == "main" ]]; then
-    #     git reset --hard "$(git describe --abbrev=0 --tags)" || return $?
-    # fi
+    curBranch=$(git rev-parse --abbrev-ref HEAD)
+    if [[ "${curBranch}" == "main" ]]; then
+        git reset --hard "$(git describe --abbrev=0 --tags)" || return $?
+    fi
     # Show a completion message
     printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
     # Data in the repositories is public anyway so we can make it readable by everyone (+r to keep executable permission if already set by git)
@@ -2487,6 +2487,9 @@ main() {
         install -d -m 755 ${PIKONEK_INSTALL_DIR}
         install -d -m 755 ${PIKONEK_LOCAL_REPO}
 
+        # clone repos
+        clone_or_update_repos
+
         # Display welcome dialogs
         welcomeDialogs
 
@@ -2514,8 +2517,11 @@ main() {
         installDocker
     fi
 
-    # Clone/Update the repos
-    clone_or_update_repos
+    # Update repos
+    if [[ "${useUpdate}" == true ]]; then
+        update_repo "${PIKONEK_INSTALL_DIR}" ${pikonekScriptGitUrl} || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+        update_repo "${PIKONEK_LOCAL_REPO}" ${pikonekGitUrl} || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    fi
 
     # Install the Core dependencies
     pip_install_packages
