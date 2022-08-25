@@ -380,10 +380,10 @@ update_repo() {
     git pull --quiet &> /dev/null || return $?
     # Check current branch. If it is master, then reset to the latest available tag.
     # In case extra commits have been added after tagging/release (i.e in case of metadata updates/README.MD tweaks)
-    curBranch=$(git rev-parse --abbrev-ref HEAD)
-    if [[ "${curBranch}" == "main" ]]; then
-        git reset --hard "$(git describe --abbrev=0 --tags)" || return $?
-    fi
+    # curBranch=$(git rev-parse --abbrev-ref HEAD)
+    # if [[ "${curBranch}" == "main" ]]; then
+    #     git reset --hard "$(git describe --abbrev=0 --tags)" || return $?
+    # fi
     # Show a completion message
     printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
     # Data in the repositories is public anyway so we can make it readable by everyone (+r to keep executable permission if already set by git)
