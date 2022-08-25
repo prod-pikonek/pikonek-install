@@ -374,7 +374,7 @@ update_repo() {
     # Let the user know what's happening
     printf "  %b %s...\\n" "${INFO}" "${str}"
     # Stash any local commits as they conflict with our working code
-    git stash --quiet &> /dev/null || true # Okay for stash failure
+    # git stash --quiet &> /dev/null || true # Okay for stash failure
     # git clean --quiet --force -d || true # Okay for already clean directory
     # Pull the latest commits
     git pull --quiet &> /dev/null || return $?
