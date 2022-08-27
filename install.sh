@@ -1823,8 +1823,7 @@ pip_install_packages() {
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3 -m pip install -U setuptools==59.6.0 &> /dev/null
 
     # Install tcconfig outside of venv
-    python3 -m pip install tcconfig==0.25.2 &> /dev/null
-
+    # python3 -m pip install tcconfig==0.25.2 &> /dev/null
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3 -m pip install -r "${PIKONEK_LOCAL_REPO}/requirements.txt" &> /dev/null || \
     { printf "  %bUnable to install required pikonek core dependencies, unable to continue%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; \
     exit 1; \
