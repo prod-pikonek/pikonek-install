@@ -2634,13 +2634,13 @@ main() {
         INSTALL_TYPE="Update"
     fi
 
-    printf "  %b Please reboot your system.\\n" "${INFO}"
-    printf "%b%s Complete! %b\\n" "${COL_LIGHT_GREEN}" "${INSTALL_TYPE}" "${COL_NC}"
-
     if [[ "${INSTALL_TYPE}" == "Update" ]]; then
         printf "\\n"
         /usr/local/bin/pikonek -v --current
     fi
+
+    printf "  %b Please reboot your system.\\n" "${INFO}"
+    printf "%b%s Complete! %b\\n" "${COL_LIGHT_GREEN}" "${INSTALL_TYPE}" "${COL_NC}"
 }
 
 # allow to source this script without running it
