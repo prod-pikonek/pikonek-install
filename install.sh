@@ -2073,9 +2073,9 @@ finalExports() {
     fi
 
     # Set the pikonek_net_mapping.yaml
-    PIKONEK_LAN_INTERFACE="lan1"
-    PIKONEK_WLAN_INTERFACE="wln1"
-    PIKONEK_WAN_INTERFACE="wan0"
+    PIKONEK_LAN_INTERFACE="${PIKONKE_LAN_ORIG_INTERFACE}"
+    PIKONEK_WLAN_INTERFACE="${PIKONKE_WLAN_ORIG_INTERFACE}"
+    PIKONEK_WAN_INTERFACE="${PIKONKE_WAN_ORIG_INTERFACE}"
     {
     echo -e "network_config:"
     echo -e "- addresses:"
