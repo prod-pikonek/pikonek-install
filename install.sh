@@ -2484,7 +2484,7 @@ main() {
     os_check
 
     # Disable predictable names
-    do_net_names
+    # do_net_names
 
     # Check if SELinux is Enforcing
     # checkSelinux
