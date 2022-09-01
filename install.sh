@@ -2056,6 +2056,11 @@ do_net_names () {
         fi
         ln -sf /dev/null /etc/systemd/network/99-default.link
         printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
+        printf "\\n  %bPredictables name detected, exiting installer. Please reboot the system now to continue then run the installer again.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}";
+        sleep 3
+        printf "\\n  %bRebooting now.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}";
+        reboot
+        exit 1
     else
         str="Predictable names is disabled"
     fi
@@ -2478,6 +2483,9 @@ main() {
     # Check that the installed OS is officially supported - display warning if not
     os_check
 
+    # Disable predictable names
+    do_net_names
+
     # Check if SELinux is Enforcing
     # checkSelinux
 
@@ -2618,9 +2626,6 @@ main() {
     fi
 
     if [[ "${useUpdate}" == false ]]; then
-        # Disable predictable names
-        do_net_names
-
         displayFinalMessage "${pw}"
         if (( ${#pw} > 0 )) ; then
             # display the password
