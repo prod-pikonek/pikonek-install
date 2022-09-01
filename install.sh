@@ -2620,11 +2620,6 @@ main() {
     /etc/.pikonek/updatecheck.sh x remote
     printf "  %b Checking version...\\n" "${TICK}"
 
-    # change back to pikonek
-    if [[ "${useUpdate}" == true ]]; then
-        chown -R pikonek:pikonek ${PIKONEK_LOCAL_REPO}
-    fi
-
     if [[ "${useUpdate}" == false ]]; then
         displayFinalMessage "${pw}"
         if (( ${#pw} > 0 )) ; then
@@ -2644,8 +2639,14 @@ main() {
         /usr/local/bin/pikonek -v --current
     fi
 
+    # change back to pikonek
+    if [[ "${useUpdate}" == true ]]; then
+        chown -R pikonek:pikonek ${PIKONEK_LOCAL_REPO}
+    fi
+
     printf "  %b Please reboot your system.\\n" "${INFO}"
     printf "%b%s Complete! %b\\n" "${COL_LIGHT_GREEN}" "${INSTALL_TYPE}" "${COL_NC}"
+
 }
 
 # allow to source this script without running it
