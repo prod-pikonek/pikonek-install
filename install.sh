@@ -668,6 +668,7 @@ configurePihole() {
     echo -e "           TZ: '${PIKONEK_TIME_ZONE}'"
     echo -e "           DNSMASQ_LISTENING: 'all'"
     echo -e "           WEB_PORT: 8080"
+    echo -e "           WEBPASSWORD: ${1}"
     echo -e "       volumes:"
     echo -e "           - './etc-pihole:/etc/pihole'"
     echo -e "           - './etc-dnsmasq.d:/etc/dnsmasq.d'"
@@ -2564,7 +2565,7 @@ main() {
         pw=$(tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c 8)
         /usr/local/bin/pikonek -a -p "${pw}"
         # configure pihole docker
-        configurePihole
+        configurePihole $pw
     fi
 
     # shellcheck disable=SC1091
