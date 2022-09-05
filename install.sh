@@ -2120,7 +2120,7 @@ finalExports() {
     echo -e "  is_wan: true"
     echo -e "  name: ${PIKONEK_WAN_INTERFACE}"
     echo -e "  hwaddr: ${PIKONEK_WAN_MAC_INTERFACE}"
-    echo -e "  orig_name: ${PIKONKE_WAN_ORIG_INTERFACE}"
+    echo -e "  orig_name: wan0"
     echo -e "  alias: ${PIKONEK_WAN_ALIAS}"
     echo -e "  pci_address: '${PIKONEK_WAN_DEVICE_ID}'"
     echo -e "  type: interface"
