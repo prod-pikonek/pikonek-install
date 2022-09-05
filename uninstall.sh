@@ -30,9 +30,9 @@ fi
 ARCH=$(dpkg --print-architecture)
 
 if [ "$ARCH" = "arm64" ] ; then
-    INSTALLER_DEPS=(build-essential python3-dev python3-venv python3-testresources libssl-dev ipcalc sqlite3 dnsmasq lighttpd libffi-dev lighttpd dnsmasq dnsmasq-utils vlan bridge-utils python3-pip python3-setuptools ipset ifupdown ntp wpasupplicant mosquitto)
+    INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv libssl-dev ipcalc sqlite3 dnsmasq lighttpd libffi-dev lighttpd dnsmasq dnsmasq-utils vlan bridge-utils ipset ifupdown ntp wpasupplicant mosquitto)
 else
-    INSTALLER_DEPS=(build-essential gcc-multilib python3-dev python3-venv python3-testresources libssl-dev ipcalc sqlite3 dnsmasq lighttpd libffi-dev lighttpd dnsmasq dnsmasq-utils vlan bridge-utils python3-pip python3-setuptools ipset ifupdown ntp wpasupplicant mosquitto)
+    INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv libssl-dev ipcalc sqlite3 dnsmasq lighttpd libffi-dev lighttpd dnsmasq dnsmasq-utils vlan bridge-utils ipset ifupdown ntp wpasupplicant mosquitto)
 fi
 
 DOCKER_DEPS=(docker-ce docker-ce-cli containerd.io docker-compose-plugin)
@@ -66,7 +66,7 @@ removeAndPurge() {
     docker compose -f /etc/pikonek/pihole/docker-compose.yaml rm pihole --stop --force || \
     true
     # uninstall pikonek dependencies
-    "${PIKONEK_FILES_DIR}"/venv/bin/python3 -m pip uninstall -y -r "${PIKONEK_FILES_DIR}/requirements.txt" || \
+    "${PIKONEK_FILES_DIR}"/venv/bin/python3.7 -m pip uninstall -y -r "${PIKONEK_FILES_DIR}/requirements.txt" || \
     true
 
     for i in "${DEPS[@]}"; do

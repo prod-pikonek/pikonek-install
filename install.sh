@@ -247,36 +247,29 @@ distro_check() {
             exit 1
         fi
         # Check for and determine version number (major and minor) of current python install
-        if is_command python3 ; then
-            printf "  %b Existing python3 installation detected\\n" "${INFO}"
+        if is_command python3.7 ; then
+            printf "  %b Existing python3.7 installation detected\\n" "${INFO}"
             pythonNewer=true
         fi
-        # Check if installed python3 to determine packages to install
+        # Check if installed python3.7 to determine packages to install
         if [[ "$pythonNewer" != true ]]; then
-            # Prefer the python3 metapackage if it's there
-            if apt-cache show python3 > /dev/null 2>&1; then
-                python3Ver="python3"
+            # Prefer the python3.7 metapackage if it's there
+            if apt-cache show python3.7 > /dev/null 2>&1; then
+                python3Ver="python3.7"
             # Else print error and exit
             else
-                printf "  %b Aborting installation: No Python3 packages were found in APT repository.\\n" "${CROSS}"
+                printf "  %b Aborting installation: No Python3.7 packages were found in APT repository.\\n" "${CROSS}"
                 exit 1
             fi
         else
-            python3Ver="python3"
-        fi
-        # We also need the correct version for `python3-pip` (which differs across distros)
-        if apt-cache show "${python3Ver}-pip" > /dev/null 2>&1; then
-            pythonpip3="python3-pip"
-        else
-            printf "  %b Aborting installation: No python3-pip module was found in APT repository.\\n" "${CROSS}"
-            exit 1
+            python3Ver="python3.7"
         fi
         # Since our install script is so large, we need several other programs to successfully get a machine provisioned
         # These programs are stored in an array so they can be looped through later
         if [ "$ARCH" = "arm64" ] ; then
-            INSTALLER_DEPS=(build-essential python3-dev python3-venv python3-testresources libssl-dev libffi-dev ipcalc lighttpd python3 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils python3-pip python3-apt python3-setuptools gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         else
-            INSTALLER_DEPS=(build-essential gcc-multilib python3-dev python3-venv python3-testresources libssl-dev libffi-dev ipcalc lighttpd python3 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils python3-pip python3-apt python3-setuptools gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         fi
         # A function to check...
         test_dpkg_lock() {
@@ -1815,17 +1808,17 @@ pip_install_packages() {
     printf "  %b Please wait and have some coffee...\\n" "${INFO}"
     printf '%*s\n' "$columns" '' | tr " " -;
     # create virtual env
-    python3 -m venv "${PIKONEK_LOCAL_REPO}/venv" &> /dev/null
+    python3.7 -m venv "${PIKONEK_LOCAL_REPO}/venv" &> /dev/null
     # upgrade pip
-    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3 -m pip install -U pip==21.3.1 &> /dev/null
+    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U pip==21.3.1 &> /dev/null
     # Install wheel
-    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3 -m pip install wheel==0.37.1 &> /dev/null
+    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install wheel==0.37.1 &> /dev/null
     # Upgrade setuptools
-    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3 -m pip install -U setuptools==59.6.0 &> /dev/null
+    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U setuptools==59.6.0 &> /dev/null
 
     # Install tcconfig outside of venv
-    # python3 -m pip install tcconfig==0.25.2 &> /dev/null
-    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3 -m pip install -r "${PIKONEK_LOCAL_REPO}/requirements.txt" &> /dev/null || \
+    # python3.7 -m pip install tcconfig==0.25.2 &> /dev/null
+    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -r "${PIKONEK_LOCAL_REPO}/requirements.txt" &> /dev/null || \
     { printf "  %bUnable to install required pikonek core dependencies, unable to continue%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; \
     exit 1; \
     }
@@ -1837,8 +1830,8 @@ pip_install_packages() {
 pip_uninstall_packages() {
     printf "  %b Uninstalling required package for pikonek core..." "${INFO}"
     # Remove pyroute2.* file
-    # rm -rf /usr/local/lib/python3.6/dist-packages/pyroute2.*
-    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3 pip uninstall -y -r "${PIKONEK_LOCAL_REPO}/requirements.txt" || \
+    # rm -rf /usr/local/lib/python3.7/dist-packages/pyroute2.*
+    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 pip uninstall -y -r "${PIKONEK_LOCAL_REPO}/requirements.txt" || \
     { printf "  %bUnable to uninstall required pikonek core dependencies, unable to continue%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; \
     exit 1; \
     }
@@ -2334,6 +2327,14 @@ finalExports() {
     echo -e "START_PIKONEK=True"
     echo -e "TIMEZONE=${PIKONEK_TIME_ZONE}"
     } > "${PIKONEK_LOCAL_REPO}/configs/pikonekInit.cfg"
+
+    # set environment variable
+    # generate secret key
+    secret=$(tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c 10)
+    {
+    echo -e "SQLALCHEMY_DATABASE_URI=sqlite:////etc/pikonek/database/db.wifirouter?check_same_thread=False"
+    echo -e "SECRET_KEY=${secret}"
+    } > "${PIKONEK_LOCAL_REPO}/pikonek/.env"
 
 }
 
