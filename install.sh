@@ -2323,9 +2323,8 @@ finalExports() {
 
     #set pikonek init
     {
-    echo -e "START_CAPTIVE=True"
-    echo -e "START_PIKONEK=True"
     echo -e "TIMEZONE=${PIKONEK_TIME_ZONE}"
+    echo -e "mosquitto=False"
     } > "${PIKONEK_LOCAL_REPO}/configs/pikonekInit.cfg"
 
     # set environment variable
@@ -2581,6 +2580,9 @@ main() {
 
     # configure mosquitto
     configureMosquitto
+    stop_service mosquitto
+    # disable service
+    disable_service mosquitto
 
     # Enable service
     enable_service S70piknkmain
