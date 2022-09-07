@@ -2312,7 +2312,6 @@ finalExports() {
     echo -e "log_level: info"
     echo -e "region: us"
     echo -e "enable: false"
-    echo -e "tunnels:"
     } > "${PIKONEK_LOCAL_REPO}/configs/ngrok.yaml"
 
     #set pikonek init
