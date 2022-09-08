@@ -57,13 +57,6 @@ A wide variety of wired Ethernet Network Interface Cards (NICs) are supported by
 ## Supported Operating Systems
 PiKonek currently supports only Ubuntu 18.04 operating system for both x86-64 and ARM hardware.
 
-For x86-64, download [Ubuntu 18.04.6-server](https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso).
-
-For Raspberry Pi 3, 
-download [Ubuntu 18.04.5-armhf](https://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.5-preinstalled-server-armhf+raspi3.img.xz).
-
-For Raspberry Pi 4, download [Ubuntu 18.04.5-armhf](https://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.5-preinstalled-server-armhf+raspi4.img.xz).
-
 # Install
 Follow these steps to install PiKonek software.
 
@@ -74,9 +67,9 @@ After installing Ubuntu 18.04, follow these steps to install PiKonek software.
 
 >Note: To continue installing PiKonek, you must have the credentials needed to install the application. To acquire the credentials please see [Pricing](https://pikonek.gitbook.io/pikonek/pricing).
 
-## Manually download the installer and run
+## One Step Automated Install
 
-`wget -O pikonek-install.sh https://raw.githubusercontent.com/prod-pikonek/pikonek-install/main/install.sh`
+`curl -sSL https://install.pikonek.com | sudo bash`
 
 Run the installer. You must be a sudo to run the command.
 
