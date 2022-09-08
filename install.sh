@@ -1810,7 +1810,7 @@ pip_install_packages() {
     # create virtual env
     python3.7 -m venv "${PIKONEK_LOCAL_REPO}/venv" &> /dev/null
     # upgrade pip
-    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U pip==21.3.1 &> /dev/null
+    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U pip==22.2.2 &> /dev/null
     # Install wheel
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install wheel==0.37.1 &> /dev/null
     # Upgrade setuptools
