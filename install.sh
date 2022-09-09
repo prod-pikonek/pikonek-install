@@ -2311,6 +2311,14 @@ finalExports() {
     echo -e "log_level: info"
     echo -e "region: us"
     echo -e "enable: false"
+    echo -e "start_all: true"
+    echo -e "tunnels:"
+    echo -e "   pikonek:"
+    echo -e "       addr: 5000"
+    echo -e "       proto: http"
+    echo -e "   ssh:"
+    echo -e "       addr: 22"
+    echo -e "       proto: tcp"
     } > "${PIKONEK_LOCAL_REPO}/configs/ngrok.yaml"
 
     #set pikonek init
