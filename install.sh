@@ -2579,9 +2579,12 @@ main() {
 
     # configure mosquitto
     configureMosquitto
-    stop_service mosquitto
-    # disable service
-    disable_service mosquitto
+    # change back to root
+    if [[ "${useUpdate}" == false ]]; then
+        stop_service mosquitto
+        # disable service
+        disable_service mosquitto
+    fi
 
     # Enable service
     enable_service S70piknkmain
