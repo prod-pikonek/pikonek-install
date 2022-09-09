@@ -2311,7 +2311,6 @@ finalExports() {
     echo -e "log_level: info"
     echo -e "region: us"
     echo -e "enable: false"
-    echo -e "start_all: true"
     echo -e "tunnels:"
     echo -e "   pikonek:"
     echo -e "       addr: 5000"
