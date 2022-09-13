@@ -25,4 +25,4 @@ if [[ "$1" == "--uninstall" ]]; then
     INSTALL_PACKAGE=false
 fi
 
-main
+main "$@"

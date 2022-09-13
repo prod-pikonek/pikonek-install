@@ -2350,8 +2350,6 @@ configurePPPoE() {
     printf "  %b %s...\\n" "${INFO}" "${str}"
     install_dependent_packages "${INSTALLER_DEPS[@]}"
     if is_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe"; then
-        # Show that we're checking it
-        printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
         # Update the repo, returning an error message on failure
         update_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe" || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
     # If it's not a .git repo,
