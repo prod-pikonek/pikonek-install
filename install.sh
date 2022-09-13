@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1090
 #
-# this script heavily adapted from pihole project
+# Pi-hole: A black hole for Internet advertisements
+# (c) Pi-hole (https://pi-hole.net)
+# Network-wide ad blocking via your own hardware.
+#
+# Installs and Updates Pi-hole
+#
+# This file is copyright under the latest version of the EUPL.
+# Please see LICENSE file for your rights under this license.
+
 set -e
 
 # List of supported DNS servers
@@ -25,6 +33,7 @@ PIKONEK_INSTALL_DIR="/etc/.pikonek"
 webroot="/var/www/html"
 pikonekScriptGitUrl="https://github.com/beta-pikonek/pikonek-install.git"
 pikonekGitUrl="https://github.com/beta-pikonek/pikonek-${ARCH}.git"
+pikonekPPPoeUrl="https://github.com/prod-pikonek/rp-pppoe.git"
 CMDLINE=/proc/cmdline
 
 PIKONEK_BIN_DIR="/usr/local/bin"
@@ -267,9 +276,9 @@ distro_check() {
         # Since our install script is so large, we need several other programs to successfully get a machine provisioned
         # These programs are stored in an array so they can be looped through later
         if [ "$ARCH" = "arm64" ] ; then
-            INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto ppp)
         else
-            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto ppp)
         fi
         # A function to check...
         test_dpkg_lock() {
@@ -2334,6 +2343,32 @@ finalExports() {
     echo -e "SECRET_KEY=${secret}"
     } > "${PIKONEK_LOCAL_REPO}/pikonek/.env"
 
+}
+
+configurePPPoE() {
+    local str="Configuring ppoe server"
+    printf "  %b %s...\\n" "${INFO}" "${str}"
+    install_dependent_packages "${INSTALLER_DEPS[@]}"
+    if is_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe"; then
+        # Show that we're checking it
+        printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
+        # Update the repo, returning an error message on failure
+        update_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe" || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    # If it's not a .git repo,
+    else
+        # Show an error
+        printf "%b  %b %s\\n" "${OVER}" "${CROSS}" "${str}"
+        # Attempt to make the repository, showing an error on failure
+        make_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe" "${pikonekPPPoeUrl}" || { printf "\\n  %bError: Could not create local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    fi
+    pushd "${PIKONEK_LOCAL_REPO}/rp-pppoe/src" &> /dev/null || return 1
+    ./configure
+    make
+    make install
+    chmod 600 /etc/ppp/chap-secrets
+    chmod 600 /etc/ppp/pap-secrets
+    popd &> /dev/null || return 1
+    printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
 }
 
 # SELinux
