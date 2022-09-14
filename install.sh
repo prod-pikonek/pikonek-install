@@ -276,9 +276,9 @@ distro_check() {
         # Since our install script is so large, we need several other programs to successfully get a machine provisioned
         # These programs are stored in an array so they can be looped through later
         if [ "$ARCH" = "arm64" ] ; then
-            INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto ppp)
+            INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         else
-            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto ppp)
+            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         fi
         # A function to check...
         test_dpkg_lock() {
@@ -2348,7 +2348,9 @@ finalExports() {
 configurePPPoE() {
     local str="Configuring ppoe server"
     printf "  %b %s...\\n" "${INFO}" "${str}"
-    install_dependent_packages "${INSTALLER_DEPS[@]}"
+    distro_check
+    PPPOE=(ppp)
+    install_dependent_packages "${PPPOE[@]}"
     if is_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe"; then
         # Update the repo, returning an error message on failure
         update_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe" || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
@@ -2359,13 +2361,45 @@ configurePPPoE() {
         # Attempt to make the repository, showing an error on failure
         make_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe" "${pikonekPPPoeUrl}" || { printf "\\n  %bError: Could not create local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
     fi
+
     pushd "${PIKONEK_LOCAL_REPO}/rp-pppoe/src" &> /dev/null || return 1
     ./configure
     make
     make install
-    chmod 600 /etc/ppp/chap-secrets
-    chmod 600 /etc/ppp/pap-secrets
+    # copy scripts
+    cp "${PIKONEK_LOCAL_REPO}/rp-pppoe/ip-up" /etc/ppp/ip-up
+    cp "${PIKONEK_LOCAL_REPO}/rp-pppoe/ip-down" /etc/ppp/ip-down
+    # Copy the file over from the local repo
+    install -D -m 644 -T  ${PIKONEK_LOCAL_REPO}/rp-pppoe/logrotate /etc/logrotate.d/pppoe
+    logusergroup="$(stat -c '%U %G' /var/log)"
+    # If the variable has a value,
+    if [[ ! -z "${logusergroup}" ]]; then
+        #
+        sed -i "s/# su #/su ${logusergroup}/g;" /etc/logrotate.d/pppoe
+    fi
+    # chmod 600 /etc/ppp/chap-secrets
+    # chmod 600 /etc/ppp/pap-secrets
     popd &> /dev/null || return 1
+
+    if [[ ! -f "${PIKONEK_LOCAL_REPO}/configs/pppoe.yaml" ]]; then    
+        # create initial config
+        {
+        echo -e "enable: false"
+        echo -e "interfaces: []"
+        echo -e "package_install: true"
+        echo -e "total_user_count: 64"
+        echo -e "user_max_logins: 0"
+        echo -e "server_address: 10.0.0.1"
+        echo -e "remote_address_range: 10.0.0.2"
+        echo -e "subnet_mask: 24"
+        echo -e "dns_servers: [8.8.8.8, 8.8.4.4]"
+        echo -e "users:"
+        echo -e "- username: pikonek"
+        echo -e "  password: pikonek12345"
+        echo -e "  ipaddress: " 
+        } > "${PIKONEK_LOCAL_REPO}/configs/pppoe.yaml"
+    fi
+
     printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
 }
 
