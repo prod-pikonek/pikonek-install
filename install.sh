@@ -2348,6 +2348,8 @@ finalExports() {
 configurePPPoE() {
     local str="Configuring ppoe server"
     printf "  %b %s...\\n" "${INFO}" "${str}"
+    # set debian front end to non interactive
+    export DEBIAN_FRONTEND=noninteractive
     distro_check
     PPPOE=(ppp)
     install_dependent_packages "${PPPOE[@]}"
