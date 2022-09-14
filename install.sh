@@ -2392,7 +2392,7 @@ configurePPPoE() {
         echo -e "server_address: 10.0.0.1"
         echo -e "remote_address_range: 10.0.0.2"
         echo -e "subnet_mask: 24"
-        echo -e "dns_servers: []"
+        echo -e "dns_servers: [10.0.0.1]"
         echo -e "users:"
         echo -e "- username: pikonek"
         echo -e "  password: pikonek12345"
