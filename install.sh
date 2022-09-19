@@ -2322,7 +2322,7 @@ finalExports() {
     echo -e "enable: false"
     echo -e "tunnels:"
     echo -e "   pikonek:"
-    echo -e "       addr: 5000"
+    echo -e "       addr: 5050"
     echo -e "       proto: http"
     echo -e "   ssh:"
     echo -e "       addr: 22"
