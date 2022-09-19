@@ -224,7 +224,7 @@ distro_check() {
         # A variable to store the command used to update the package cache
         UPDATE_PKG_CACHE="${PKG_MANAGER} update"
         # An array for something...
-        PKG_INSTALL=("${PKG_MANAGER}" -qq --no-install-recommends install)
+        PKG_INSTALL=("${PKG_MANAGER}" -y -qq --no-install-recommends install)
         # grep -c will return 1 retVal on 0 matches, block this throwing the set -e with an OR TRUE
         PKG_COUNT="${PKG_MANAGER} -s -o Debug::NoLocking=true upgrade | grep -c ^Inst || true"
         # Some distros vary slightly so these fixes for dependencies may apply
@@ -2389,16 +2389,13 @@ configurePPPoE() {
         echo -e "enable: false"
         echo -e "interfaces: []"
         echo -e "package_install: true"
-        echo -e "total_user_count: 64"
-        echo -e "user_max_logins: 0"
+        echo -e "total_user_count: 100"
+        echo -e "authentication: local"
+        echo -e "user_max_logins: 1"
         echo -e "server_address: 10.0.0.1"
         echo -e "remote_address_range: 10.0.0.2"
-        echo -e "subnet_mask: 24"
-        echo -e "dns_servers: [10.0.0.1]"
-        echo -e "users:"
-        echo -e "- username: pikonek"
-        echo -e "  password: pikonek12345"
-        echo -e "  ipaddress: " 
+        echo -e "subnet_mask: 23"
+        echo -e "dns_servers: [10.0.0.1, 8.8.8.8]"
         } > "${PIKONEK_LOCAL_REPO}/configs/pppoe.yaml"
     fi
 
