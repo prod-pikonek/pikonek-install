@@ -14,6 +14,10 @@ main() {
         if [[ "${PACKAGE}" == "pppoe" ]]; then
             configurePPPoE
         fi
+
+        if [[ "${PACKAGE}" == "sqm" ]]; then
+            configureSQM
+        fi
     fi
 }
 

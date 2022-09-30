@@ -34,6 +34,7 @@ webroot="/var/www/html"
 pikonekScriptGitUrl="https://github.com/beta-pikonek/pikonek-install.git"
 pikonekGitUrl="https://github.com/beta-pikonek/pikonek-${ARCH}.git"
 pikonekPPPoeUrl="https://github.com/prod-pikonek/rp-pppoe.git"
+pikonekSQMUrl="https://github.com/prod-pikonek/sqm-scripts.git"
 CMDLINE=/proc/cmdline
 
 PIKONEK_BIN_DIR="/usr/local/bin"
@@ -2329,7 +2330,7 @@ finalExports() {
     echo -e "       proto: tcp"
     } > "${PIKONEK_LOCAL_REPO}/configs/ngrok.yaml"
 
-    #set pikonek init
+    # set pikonek init
     {
     echo -e "TIMEZONE=${PIKONEK_TIME_ZONE}"
     echo -e "mosquitto=False"
@@ -2343,6 +2344,37 @@ finalExports() {
     echo -e "SECRET_KEY=${secret}"
     } > "${PIKONEK_LOCAL_REPO}/pikonek/.env"
 
+}
+
+configureSQM() {
+    local str="Configuring sqm"
+    printf "  %b %s...\\n" "${INFO}" "${str}"
+    if is_repo "${PIKONEK_LOCAL_REPO}/sqm-scripts"; then
+        # Update the repo, returning an error message on failure
+        update_repo "${PIKONEK_LOCAL_REPO}/sqm-scripts" || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    # If it's not a .git repo,
+    else
+        # Show an error
+        printf "%b  %b %s\\n" "${OVER}" "${CROSS}" "${str}"
+        # Attempt to make the repository, showing an error on failure
+        make_repo "${PIKONEK_LOCAL_REPO}/sqm-scripts" "${pikonekSQMUrl}" || { printf "\\n  %bError: Could not create local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    fi
+
+    pushd "${PIKONEK_LOCAL_REPO}/sqm-scripts" &> /dev/null || return 1
+    make install
+    popd &> /dev/null || return 1
+
+    if [[ ! -f "${PIKONEK_LOCAL_REPO}/configs/sqm.yaml" ]]; then    
+        # create initial config
+        {
+        echo -e "enable: false"
+        echo -e "uplink: 1000"
+        echo -e "downlink: 5000"
+        echo -e "package_install: true"
+        } > "${PIKONEK_LOCAL_REPO}/configs/sqm.yaml"
+    fi
+
+    printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
 }
 
 configurePPPoE() {
