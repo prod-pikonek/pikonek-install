@@ -1535,18 +1535,20 @@ installpikonek() {
         install -o "${USER}" -Dm755 -d "${PIKONEK_LOCAL_REPO}"
     fi
     # install pikonek core init script to /etc/init.d
-    if [[ ! -f /etc/init.d/S70piknkmain ]]; then
-        install -m 0755 ${PIKONEK_LOCAL_REPO}/etc/init.d/S70piknkmain /etc/init.d/S70piknkmain
-    fi 
+    # if [[ ! -f /etc/init.d/S70piknkmain ]]; then
+    #     install -m 0755 ${PIKONEK_LOCAL_REPO}/etc/init.d/S70piknkmain /etc/init.d/S70piknkmain
+    # fi
+    install -m 0755 ${PIKONEK_LOCAL_REPO}/etc/init.d/S70piknkmain /etc/init.d/S70piknkmain 
     # Check if there is /etc/sysctl.conf
     if [ -e /etc/sysctl.conf ];
     then
         # Check if there is a match
         # Backup sysctl.conf
         cp /etc/sysctl.conf /etc/sysctl.conf.old
-        if grep -qE '#net.ipv4.ip_forward=1' /etc/sysctl.conf; then
-            sed -i '/#net.ipv4.ip_forward=1/a\net.ipv4.ip_forward=1' /etc/sysctl.conf
-        fi
+        install -m 0644 ${PIKONEK_LOCAL_REPO}/configs/sysctl.conf /etc/sysctl.conf
+        # if grep -qE '#net.ipv4.ip_forward=1' /etc/sysctl.conf; then
+        #     sed -i '/#net.ipv4.ip_forward=1/a\net.ipv4.ip_forward=1' /etc/sysctl.conf
+        # fi
     else
         install -m 0644 ${PIKONEK_LOCAL_REPO}/configs/sysctl.conf /etc/sysctl.conf
     fi
@@ -2695,7 +2697,7 @@ main() {
     fi
 
     if [[ "${PIKONEK_MAIN_ENABLED}" == false ]]; then
-        restart_service S70piknkmain
+        # restart_service S70piknkmain
         enable_service S70piknkmain
     else
         printf "  %b S70piknkmain is disabled, skipping service restart\\n" "${INFO}"
