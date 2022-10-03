@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1090
 #
-# this script heavily adapted from pihole project
+# Pi-hole: A black hole for Internet advertisements
+# (c) Pi-hole (https://pi-hole.net)
+# Network-wide ad blocking via your own hardware.
+#
+# Installs and Updates Pi-hole
+#
+# This file is copyright under the latest version of the EUPL.
+# Please see LICENSE file for your rights under this license.
+
 set -e
 
 # List of supported DNS servers
@@ -25,6 +33,8 @@ PIKONEK_INSTALL_DIR="/etc/.pikonek"
 webroot="/var/www/html"
 pikonekScriptGitUrl="https://github.com/prod-pikonek/pikonek-install.git"
 pikonekGitUrl="https://github.com/prod-pikonek/pikonek-${ARCH}.git"
+pikonekPPPoeUrl="https://github.com/prod-pikonek/rp-pppoe.git"
+pikonekSQMUrl="https://github.com/prod-pikonek/sqm-scripts.git"
 CMDLINE=/proc/cmdline
 
 PIKONEK_BIN_DIR="/usr/local/bin"
@@ -215,7 +225,7 @@ distro_check() {
         # A variable to store the command used to update the package cache
         UPDATE_PKG_CACHE="${PKG_MANAGER} update"
         # An array for something...
-        PKG_INSTALL=("${PKG_MANAGER}" -qq --no-install-recommends install)
+        PKG_INSTALL=("${PKG_MANAGER}" -y -qq --no-install-recommends install)
         # grep -c will return 1 retVal on 0 matches, block this throwing the set -e with an OR TRUE
         PKG_COUNT="${PKG_MANAGER} -s -o Debug::NoLocking=true upgrade | grep -c ^Inst || true"
         # Some distros vary slightly so these fixes for dependencies may apply
@@ -1525,18 +1535,20 @@ installpikonek() {
         install -o "${USER}" -Dm755 -d "${PIKONEK_LOCAL_REPO}"
     fi
     # install pikonek core init script to /etc/init.d
-    if [[ ! -f /etc/init.d/S70piknkmain ]]; then
-        install -m 0755 ${PIKONEK_LOCAL_REPO}/etc/init.d/S70piknkmain /etc/init.d/S70piknkmain
-    fi 
+    # if [[ ! -f /etc/init.d/S70piknkmain ]]; then
+    #     install -m 0755 ${PIKONEK_LOCAL_REPO}/etc/init.d/S70piknkmain /etc/init.d/S70piknkmain
+    # fi
+    install -m 0755 ${PIKONEK_LOCAL_REPO}/etc/init.d/S70piknkmain /etc/init.d/S70piknkmain 
     # Check if there is /etc/sysctl.conf
     if [ -e /etc/sysctl.conf ];
     then
         # Check if there is a match
         # Backup sysctl.conf
         cp /etc/sysctl.conf /etc/sysctl.conf.old
-        if grep -qE '#net.ipv4.ip_forward=1' /etc/sysctl.conf; then
-            sed -i '/#net.ipv4.ip_forward=1/a\net.ipv4.ip_forward=1' /etc/sysctl.conf
-        fi
+        install -m 0644 ${PIKONEK_LOCAL_REPO}/configs/sysctl.conf /etc/sysctl.conf
+        # if grep -qE '#net.ipv4.ip_forward=1' /etc/sysctl.conf; then
+        #     sed -i '/#net.ipv4.ip_forward=1/a\net.ipv4.ip_forward=1' /etc/sysctl.conf
+        # fi
     else
         install -m 0644 ${PIKONEK_LOCAL_REPO}/configs/sysctl.conf /etc/sysctl.conf
     fi
@@ -2313,14 +2325,14 @@ finalExports() {
     echo -e "enable: false"
     echo -e "tunnels:"
     echo -e "   pikonek:"
-    echo -e "       addr: 5000"
+    echo -e "       addr: 5050"
     echo -e "       proto: http"
     echo -e "   ssh:"
     echo -e "       addr: 22"
     echo -e "       proto: tcp"
     } > "${PIKONEK_LOCAL_REPO}/configs/ngrok.yaml"
 
-    #set pikonek init
+    # set pikonek init
     {
     echo -e "TIMEZONE=${PIKONEK_TIME_ZONE}"
     echo -e "mosquitto=False"
@@ -2334,6 +2346,94 @@ finalExports() {
     echo -e "SECRET_KEY=${secret}"
     } > "${PIKONEK_LOCAL_REPO}/pikonek/.env"
 
+}
+
+configureSQM() {
+    local str="Configuring sqm"
+    printf "  %b %s...\\n" "${INFO}" "${str}"
+    if is_repo "${PIKONEK_LOCAL_REPO}/sqm-scripts"; then
+        # Update the repo, returning an error message on failure
+        update_repo "${PIKONEK_LOCAL_REPO}/sqm-scripts" || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    # If it's not a .git repo,
+    else
+        # Show an error
+        printf "%b  %b %s\\n" "${OVER}" "${CROSS}" "${str}"
+        # Attempt to make the repository, showing an error on failure
+        make_repo "${PIKONEK_LOCAL_REPO}/sqm-scripts" "${pikonekSQMUrl}" || { printf "\\n  %bError: Could not create local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    fi
+
+    pushd "${PIKONEK_LOCAL_REPO}/sqm-scripts" &> /dev/null || return 1
+    make install
+    popd &> /dev/null || return 1
+
+    if [[ ! -f "${PIKONEK_LOCAL_REPO}/configs/sqm.yaml" ]]; then    
+        # create initial config
+        {
+        echo -e "enable: false"
+        echo -e "uplink: 1000"
+        echo -e "downlink: 5000"
+        echo -e "package_install: true"
+        } > "${PIKONEK_LOCAL_REPO}/configs/sqm.yaml"
+    fi
+
+    printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
+}
+
+configurePPPoE() {
+    local str="Configuring ppoe server"
+    printf "  %b %s...\\n" "${INFO}" "${str}"
+    # set debian front end to non interactive
+    export DEBIAN_FRONTEND=noninteractive
+    distro_check
+    PPPOE=(ppp)
+    install_dependent_packages "${PPPOE[@]}"
+    if is_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe"; then
+        # Update the repo, returning an error message on failure
+        update_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe" || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    # If it's not a .git repo,
+    else
+        # Show an error
+        printf "%b  %b %s\\n" "${OVER}" "${CROSS}" "${str}"
+        # Attempt to make the repository, showing an error on failure
+        make_repo "${PIKONEK_LOCAL_REPO}/rp-pppoe" "${pikonekPPPoeUrl}" || { printf "\\n  %bError: Could not create local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
+    fi
+
+    pushd "${PIKONEK_LOCAL_REPO}/rp-pppoe/src" &> /dev/null || return 1
+    ./configure
+    make
+    make install
+    # copy scripts
+    cp "${PIKONEK_LOCAL_REPO}/rp-pppoe/ip-up" /etc/ppp/ip-up
+    cp "${PIKONEK_LOCAL_REPO}/rp-pppoe/ip-down" /etc/ppp/ip-down
+    # Copy the file over from the local repo
+    install -D -m 644 -T  ${PIKONEK_LOCAL_REPO}/rp-pppoe/logrotate /etc/logrotate.d/pppoe
+    logusergroup="$(stat -c '%U %G' /var/log)"
+    # If the variable has a value,
+    if [[ ! -z "${logusergroup}" ]]; then
+        #
+        sed -i "s/# su #/su ${logusergroup}/g;" /etc/logrotate.d/pppoe
+    fi
+    # chmod 600 /etc/ppp/chap-secrets
+    # chmod 600 /etc/ppp/pap-secrets
+    popd &> /dev/null || return 1
+
+    if [[ ! -f "${PIKONEK_LOCAL_REPO}/configs/pppoe.yaml" ]]; then    
+        # create initial config
+        {
+        echo -e "enable: false"
+        echo -e "interfaces: []"
+        echo -e "package_install: true"
+        echo -e "total_user_count: 100"
+        echo -e "authentication: local"
+        echo -e "user_max_logins: 1"
+        echo -e "server_address: 10.0.0.1"
+        echo -e "remote_address_range: 10.0.0.2"
+        echo -e "subnet_mask: 23"
+        echo -e "dns_servers: [10.0.0.1, 8.8.8.8]"
+        } > "${PIKONEK_LOCAL_REPO}/configs/pppoe.yaml"
+    fi
+
+    printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
 }
 
 # SELinux
@@ -2597,7 +2697,7 @@ main() {
     fi
 
     if [[ "${PIKONEK_MAIN_ENABLED}" == false ]]; then
-        restart_service S70piknkmain
+        # restart_service S70piknkmain
         enable_service S70piknkmain
     else
         printf "  %b S70piknkmain is disabled, skipping service restart\\n" "${INFO}"
