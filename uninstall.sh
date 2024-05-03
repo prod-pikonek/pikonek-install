@@ -165,7 +165,7 @@ removeNoPurge() {
     fi
 
     echo -e "\\n   We're sorry to see you go, but thanks for checking out PiKonek!
-       Reinstall at any time: ${COL_LIGHT_RED}curl -sSL https://install.pikonek.com | bash.
+       Reinstall at any time: ${COL_LIGHT_RED}curl -sSL install.pikonek.com | bash.
        Please restart your machine.
       ${COL_LIGHT_GREEN}Uninstallation Complete!"
 }
