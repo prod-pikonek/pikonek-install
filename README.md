@@ -69,7 +69,7 @@ After installing Ubuntu 18.04, follow these steps to install PiKonek software.
 
 ## One Step Automated Install
 
-`curl -sSL https://install.pikonek.com | sudo bash`
+`curl -sSL install.pikonek.com | sudo bash`
 
 Run the installer. You must be a sudo to run the command.
 
