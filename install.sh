@@ -1820,16 +1820,21 @@ pip_install_packages() {
     printf "  %b Please wait and have some coffee...\\n" "${INFO}"
     printf '%*s\n' "$columns" '' | tr " " -;
     # create virtual env
+    printf "  %b Creating virtual environment...\\n" "${INFO}"
     python3.7 -m venv "${PIKONEK_LOCAL_REPO}/venv" &> /dev/null
     # upgrade pip
+    printf "  %b Upgrading pip...\\n" "${INFO}"
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U pip==22.2.2 &> /dev/null
     # Install wheel
+    printf "  %b Installing wheel...\\n" "${INFO}"
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install wheel==0.37.1 &> /dev/null
     # Upgrade setuptools
+    printf "  %b Upgrading setuptools...\\n" "${INFO}"
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U setuptools==59.6.0 &> /dev/null
 
     # Install tcconfig outside of venv
     # python3.7 -m pip install tcconfig==0.25.2 &> /dev/null
+    printf "  %b Installing dependencies...\\n" "${INFO}"
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -r "${PIKONEK_LOCAL_REPO}/requirements.txt" &> /dev/null || \
     { printf "  %bUnable to install required pikonek core dependencies, unable to continue%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; \
     exit 1; \
