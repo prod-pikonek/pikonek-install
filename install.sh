@@ -1833,6 +1833,8 @@ pip_install_packages() {
     # Upgrade setuptools
     printf "  %b Upgrading setuptools...\\n" "${INFO}"
     "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U setuptools==59.6.0 &> /dev/null
+    "${PIKONEK_LOCAL_REPO}"/venv/bin/python3.7 -m pip install -U simplejson==3.17.6 &> /dev/null
+
 
     # Install tcconfig outside of venv
     # python3.7 -m pip install tcconfig==0.25.2 &> /dev/null
