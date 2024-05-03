@@ -277,9 +277,9 @@ distro_check() {
         # Since our install script is so large, we need several other programs to successfully get a machine provisioned
         # These programs are stored in an array so they can be looped through later
         if [ "$ARCH" = "arm64" ] ; then
-            INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential python3.7-dev python3-venv python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         else
-            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3-venv python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         fi
         # A function to check...
         test_dpkg_lock() {
@@ -1571,6 +1571,8 @@ installpikonek() {
     if [[ ! -f /etc/pikonek/license/license.lic ]]; then
         cp ${PIKONEK_LOCAL_REPO}/license/license.lic.trial ${PIKONEK_LOCAL_REPO}/license/license.lic
     fi
+
+    export PYARMOR_LICENSE="${PIKONEK_LOCAL_REPO}/license/license.lic"
     
     # install web server
     installpikonekWebServer
@@ -2608,9 +2610,6 @@ main() {
         # Set timezone
         setTimezone
 
-        # Install the Core dependencies
-        pip_install_packages
-
         # Determine available interfaces
         get_available_interfaces
         get_available_lan_interfaces
@@ -2657,6 +2656,9 @@ main() {
     if [[ "${useUpdate}" == false ]]; then
         finalExports
     fi
+
+    # Install the Core dependencies
+    pip_install_packages
     
     configurePikonekCore
     # configure the database
