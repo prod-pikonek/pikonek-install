@@ -2603,6 +2603,9 @@ main() {
         # Set timezone
         setTimezone
 
+        # Install the Core dependencies
+        pip_install_packages
+
         # Determine available interfaces
         get_available_interfaces
         get_available_lan_interfaces
@@ -2630,9 +2633,6 @@ main() {
         update_repo "${PIKONEK_INSTALL_DIR}" ${pikonekScriptGitUrl} || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
         update_repo "${PIKONEK_LOCAL_REPO}" ${pikonekGitUrl} || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
     fi
-
-    # Install the Core dependencies
-    pip_install_packages
 
     # On some systems, lighttpd is not enabled on first install. We need to enable it here if the user
     # has chosen to install the web interface, else the `LIGHTTPD_ENABLED` check will fail
