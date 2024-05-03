@@ -1818,7 +1818,7 @@ notify_package_updates_available() {
 pip_install_packages() {
     printf "  %b Installing required package for pikonek core...\\n" "${INFO}"
     printf "  %b Please wait and have some coffee...\\n" "${INFO}"
-    printf '%*s\n' "$columns" '' | tr " " -;
+    # printf '%*s\n' "$columns" '' | tr " " -;
     # create virtual env
     printf "  %b Creating virtual environment...\\n" "${INFO}"
     python3.7 -m venv "${PIKONEK_LOCAL_REPO}/venv" &> /dev/null
@@ -1839,7 +1839,7 @@ pip_install_packages() {
     { printf "  %bUnable to install required pikonek core dependencies, unable to continue%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; \
     exit 1; \
     }
-    printf '%*s\n' "$columns" '' | tr " " -;
+    # printf '%*s\n' "$columns" '' | tr " " -;
     printf "\\n"
 }
 
