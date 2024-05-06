@@ -65,11 +65,11 @@ Follow these steps to install PiKonek software.
 ## Installing PiKonek
 After installing Ubuntu 18.04, follow these steps to install PiKonek software.
 
->Note: To continue installing PiKonek, you must have the credentials needed to install the application. To acquire the credentials please see [Pricing](https://pikonek.com/buy).
+>Note: To continue installing PiKonek, you must have the credentials needed to install the application. To acquire the credentials please see [Pricing](https://pikonek.gitbook.io/pikonek/pricing).
 
 ## One Step Automated Install
 
-`curl -sSL install.pikonek.com | sudo bash`
+`curl -sSL https://install.pikonek.com | sudo bash`
 
 Run the installer. You must be a sudo to run the command.
 

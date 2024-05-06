@@ -5,6 +5,7 @@
 # Please see LICENSE file for your rights under this license.
 
 # Variables
+BUILD_ENV=prod
 ARCH=$(dpkg --print-architecture)
 readonly PIKONEK_GIT_URL="https://github.com/prod-pikonek/pikonek-${ARCH}.git"
 readonly PIKONEK_SCRIPTS_GIT_URL="https://github.com/prod-pikonek/pikonek-install.git"
@@ -100,7 +101,7 @@ main() {
     # This is unlikely
     if ! is_repo "${PIKONEK_FILES_DIR}" ; then
         echo -e "\\n  ${COL_LIGHT_RED}Error: Core Pikonek repo is missing from system!"
-        echo -e "  Please re-run install script from https://github.com/beta-pikonek/pikonek-install${COL_NC}"
+        echo -e "  Please re-run install script from https://github.com/prod-pikonek/pikonek-install${COL_NC}"
         exit 1;
     fi
 

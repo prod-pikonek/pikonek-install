@@ -3,6 +3,12 @@
 # Checks for local or remote versions and branches
 # This script if from pihole project
 
+BUILD_ENV=prod
+PIKONEK_AMD64="https://api.github.com/repos/prod-pikonek/pikonek-amd64/releases/latest"
+PIKONEK_ARM64="https://api.github.com/repos/prod-pikonek/pikonek-arm64/releases/latest"
+PIKONEK_ARMHF="https://api.github.com/repos/prod-pikonek/pikonek-armhf/releases/latest"
+PIKONEK_INSTALL="https://api.github.com/repos/prod-pikonek/pikonek-install/releases/latest"
+
 # Credit: https://stackoverflow.com/a/46324904
 function json_extract() {
     local key=$1
@@ -42,17 +48,17 @@ if [[ "$2" == "remote" ]]; then
     rm -rf $GITHUB_VERSION_FILE
 
     if [ "$ARCH" == "amd64" ]; then
-        GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s 'https://api.github.com/repos/prod-pikonek/pikonek-amd64/releases/latest' 2> /dev/null)")"
+        GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s ${PIKONEK_AMD64} 2> /dev/null)")"
     elif [ "$ARCH" == "amd64" ]; then
-        GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s 'https://api.github.com/repos/prod-pikonek/pikonek-arm64/releases/latest' 2> /dev/null)")"
+        GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s ${PIKONEK_ARM64} 2> /dev/null)")"
     else
-        GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s 'https://api.github.com/repos/prod-pikonek/pikonek-armhf/releases/latest' 2> /dev/null)")"
+        GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s ${PIKONEK_ARMHF} 2> /dev/null)")"
     fi
     
     echo -n "${GITHUB_CORE_VERSION}" >> "${GITHUB_VERSION_FILE}"
     chmod 644 "${GITHUB_VERSION_FILE}"
 
-    GITHUB_SCRIPT_VERSION="$(json_extract tag_name "$(curl -s 'https://api.github.com/repos/prod-pikonek/pikonek-install/releases/latest' 2> /dev/null)")"
+    GITHUB_SCRIPT_VERSION="$(json_extract tag_name "$(curl -s ${PIKONEK_INSTALL} 2> /dev/null)")"
     echo -n " ${GITHUB_SCRIPT_VERSION}" >> "${GITHUB_VERSION_FILE}"
 
 else

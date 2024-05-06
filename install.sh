@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1090
 #
-# Pi-hole: A black hole for Internet advertisements
-# (c) Pi-hole (https://pi-hole.net)
-# Network-wide ad blocking via your own hardware.
-#
-# Installs and Updates Pi-hole
-#
-# This file is copyright under the latest version of the EUPL.
-# Please see LICENSE file for your rights under this license.
-
+# this script heavily adapted from pihole project
 set -e
 
+BUILD_ENV=prod
 # List of supported DNS servers
 DNS_SERVERS=$(cat << EOM
 Google (ECS);8.8.8.8;8.8.4.4;2001:4860:4860:0:0:0:0:8888;2001:4860:4860:0:0:0:0:8844

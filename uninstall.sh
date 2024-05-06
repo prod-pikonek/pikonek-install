@@ -3,6 +3,7 @@
 # source taken from pihole 2017 Pi-hole, LLC (https://pi-hole.net)
 set -e
 
+BUILD_ENV=prod
 readonly PIKONEK_FILES_DIR="/etc/pikonek"
 readonly PIKONEK_SCRIPT_DIR="/etc/.pikonek"
 SKIP_INSTALL="true"
