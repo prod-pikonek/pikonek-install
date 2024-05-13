@@ -40,10 +40,10 @@ fi
 # this script can run
 IPV4_ADDRESS=${IPV4_ADDRESS}
 IPV6_ADDRESS=${IPV6_ADDRESS}
-LIGHTTPD_USER="www-data"
-LIGHTTPD_GROUP="www-data"
+NGINX_USER="www-data"
+NGINX_GROUP="www-data"
 # and config file
-LIGHTTPD_CFG="lighttpd.conf"
+NGINX_CFG="01-pikonek.nginx.conf"
 COUNTRY="PH"
 
 if [ -z "${USER}" ]; then
@@ -121,8 +121,6 @@ show_ascii_berry() {
     "
 }
 
-
-
 is_command() {
     # Checks for existence of string passed in as only function argument.
     # Exit value of 0 when exists, 1 if not exists. Value is the result
@@ -130,6 +128,25 @@ is_command() {
     local check_command="$1"
 
     command -v "${check_command}" >/dev/null 2>&1
+}
+
+package_check() {
+    dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -c "ok installed"
+}
+
+uninstall_lighttpd() {
+    if package_check lighttpd > /dev/null; then
+        apt-get -y remove --purge lighttpd
+        if [[ -f /etc/lighttpd/lighttpd.conf.orig ]]; then
+            ${SUDO} mv /etc/lighttpd/lighttpd.conf.orig /etc/lighttpd/lighttpd.conf
+        fi
+
+        if [[ -f /etc/lighttpd/external.conf ]]; then
+            ${SUDO} rm /etc/lighttpd/external.conf
+        fi
+
+        echo -e "  ${TICK} Removed lighttpd"
+    fi
 }
 
 os_check() {
@@ -270,9 +287,9 @@ distro_check() {
         # Since our install script is so large, we need several other programs to successfully get a machine provisioned
         # These programs are stored in an array so they can be looped through later
         if [ "$ARCH" = "arm64" ] ; then
-            INSTALLER_DEPS=(build-essential python3.7-dev python3-venv python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential python3.7-dev python3-venv python3.7-venv virt-what libssl-dev libffi-dev ipcalc nginx python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         else
-            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3-venv python3.7-venv virt-what libssl-dev libffi-dev ipcalc lighttpd python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
+            INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3-venv python3.7-venv virt-what libssl-dev libffi-dev ipcalc nginx python3.7 sqlite3 dnsmasq dnsmasq-utils vlan bridge-utils gawk curl cron wget iptables ipset whiptail git openssl ifupdown ntp wpasupplicant gnupg lsb-release ca-certificates mosquitto)
         fi
         # A function to check...
         test_dpkg_lock() {
@@ -1515,13 +1532,13 @@ installpikonek() {
 
     # cp -r ${PIKONEK_LOCAL_REPO}/pikonek-ui-react/build/** /var/www/html
 
-    chown ${LIGHTTPD_USER}:${LIGHTTPD_GROUP} ${webroot}
+    chown ${NGINX_USER}:${NGINX_GROUP} ${webroot}
     chmod 0775 ${webroot}
     # Repair permissions if /var/www/html is not world readable
     chmod a+rx /var/www
     chmod a+rx /var/www/html
-    # Give lighttpd access to the pikonek group so the web interface can acces the db
-    usermod -a -G pikonek ${LIGHTTPD_USER} &> /dev/null
+    # Give nginx access to the pikonek group so the web interface can acces the db
+    usermod -a -G pikonek ${NGINX_USER} &> /dev/null
 
     # install pikonek core web service
     if [[ ! -d "${PIKONEK_LOCAL_REPO}" ]]; then
@@ -1620,26 +1637,18 @@ installConfigs() {
     install -o "${USER}" -Dm755 -d "${PIKONEK_LOCAL_REPO}/configs"
     cp -r  ${PIKONEK_LOCAL_REPO}/configs/** ${PIKONEK_LOCAL_REPO}/configs &> /dev/null
     # and if the Web server conf directory does not exist,
-    if [[ ! -d "/etc/lighttpd" ]]; then
+    if [[ ! -d "/etc/nginx" ]]; then
         # make it and set the owners
-        install -d -m 755 -o "${USER}" -g root /etc/lighttpd
+        install -d -m 755 -o "${USER}" -g root /etc/nginx
     # Otherwise, if the config file already exists
-    elif [[ -f "/etc/lighttpd/lighttpd.conf" ]]; then
+    elif [[ -f "/etc/nginx/sites-available/default" ]]; then
         # back up the original
-        mv /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf.orig
+        mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.orig
     fi
     # and copy in the config file PiKonek needs
-    install -D -m 644 -T "${PIKONEK_LOCAL_REPO}/configs/${LIGHTTPD_CFG}" /etc/lighttpd/lighttpd.conf
-    # Make sure the external.conf file exists, as lighttpd v1.4.50 crashes without it
-    touch /etc/lighttpd/external.conf
-    chmod 644 /etc/lighttpd/external.conf
-    # Make the directories if they do not exist and set the owners
-    mkdir -p /run/lighttpd
-    chown ${LIGHTTPD_USER}:${LIGHTTPD_GROUP} /run/lighttpd
-    mkdir -p /var/cache/lighttpd/compress
-    chown ${LIGHTTPD_USER}:${LIGHTTPD_GROUP} /var/cache/lighttpd/compress
-    mkdir -p /var/cache/lighttpd/uploads
-    chown ${LIGHTTPD_USER}:${LIGHTTPD_GROUP} /var/cache/lighttpd/uploads
+    install -D -m 644 -T "${PIKONEK_LOCAL_REPO}/configs/${NGINX_CFG}" /etc/nginx/sites-available/default
+    # Copy the nginx.conf
+    cp "${PIKONEK_LOCAL_REPO}/configs/nginx.conf" /etc/nginx/nginx.conf
 }
 
 configureDatabase() {
@@ -1924,22 +1933,6 @@ install_dependent_packages() {
 
 # Install the Web interface dashboard
 installpikonekWebServer() {
-    local str="Backing up index.lighttpd.html"
-    printf "  %b %s..." "${INFO}" "${str}"
-    # If the default index file exists,
-    if [[ -f "${webroot}/index.lighttpd.html" ]]; then
-        # back it up
-        mv ${webroot}/index.lighttpd.html ${webroot}/index.lighttpd.orig
-        printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
-    # Otherwise,
-    else
-        # don't do anything
-        printf "%b  %b %s\\n" "${OVER}" "${INFO}" "${str}"
-        printf "      No default index.lighttpd.html file found... not backing up\\n"
-    fi
-    
-    printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
-
     # Install Sudoers file
     local str="Installing sudoer file"
     printf "\\n  %b %s..." "${INFO}" "${str}"
@@ -1947,16 +1940,10 @@ installpikonekWebServer() {
     install -d -m 755 /etc/sudoers.d/
     # and copy in the pikonek sudoers file
     install -m 0640 ${PIKONEK_LOCAL_REPO}/scripts/pikonek.sudo /etc/sudoers.d/pikonek
-    # Add lighttpd user (OS dependent) to sudoers file
-    echo "${LIGHTTPD_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/pikonek
+    # Add nginx user (OS dependent) to sudoers file
+    echo "${NGINX_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/pikonek
     echo "pikonek ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/pikonek
 
-    # If the Web server user is lighttpd,
-    if [[ "$LIGHTTPD_USER" == "lighttpd" ]]; then
-        # Allow executing pikonek via sudo with Fedora
-        # Usually /usr/local/bin ${PIKONEK_BIN_DIR} is not permitted as directory for sudoable programs
-        echo "Defaults secure_path = /sbin:/bin:/usr/sbin:/usr/bin:${PIKONEK_BIN_DIR}" >> /etc/sudoers.d/pikonek
-    fi
     # Set the strict permissions on the file
     chmod 0440 /etc/sudoers.d/pikonek
     printf "%b  %b %s\\n" "${OVER}" "${TICK}" "${str}"
@@ -2633,14 +2620,17 @@ main() {
         update_repo "${PIKONEK_LOCAL_REPO}" ${pikonekGitUrl} || { printf "\\n  %b: Could not update local repository. Contact support.%b\\n" "${COL_LIGHT_RED}" "${COL_NC}"; exit 1; }
     fi
 
-    # On some systems, lighttpd is not enabled on first install. We need to enable it here if the user
-    # has chosen to install the web interface, else the `LIGHTTPD_ENABLED` check will fail
-    enable_service lighttpd
-    # Determine if lighttpd is correctly enabled
-    if check_service_active "lighttpd"; then
-        LIGHTTPD_ENABLED=true
+    # Uninstall lighttpd
+    uninstall_lighttpd
+
+    # On some systems, nginx is not enabled on first install. We need to enable it here if the user
+    # has chosen to install the web interface, else the `NGINX_ENABLED` check will fail
+    enable_service nginx
+    # Determine if  NGINX is correctly enabled
+    if check_service_active "nginx"; then
+        NGINX_ENABLED=true
     else
-        LIGHTTPD_ENABLED=false
+        NGINX_ENABLED=false
     fi
     # Create the pikonek user
     create_pikonek_user
@@ -2705,12 +2695,11 @@ main() {
         printf "  %b S70piknkmain is disabled, skipping service restart\\n" "${INFO}"
     fi
 
-    if [[ "${LIGHTTPD_ENABLED}" == true ]]; then
-        restart_service lighttpd
-        enable_service lighttpd
-    else
-        printf "  %b Lighttpd is disabled, skipping service restart\\n" "${INFO}"
-    fi
+    # if [[ "${NGINX_ENABLED}" == true ]]; then
+    #     restart_service nginx
+    # else
+    #     printf "  %b Nginx is disabled, skipping service restart\\n" "${INFO}"
+    # fi
 
     printf "  %b Restarting services...\\n" "${INFO}"
 

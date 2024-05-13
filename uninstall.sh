@@ -31,9 +31,9 @@ fi
 ARCH=$(dpkg --print-architecture)
 
 if [ "$ARCH" = "arm64" ] ; then
-    INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv libssl-dev ipcalc sqlite3 dnsmasq lighttpd libffi-dev lighttpd dnsmasq dnsmasq-utils vlan bridge-utils ipset ifupdown ntp wpasupplicant mosquitto)
+    INSTALLER_DEPS=(build-essential python3.7-dev python3.7-venv libssl-dev ipcalc sqlite3 dnsmasq nginx libffi-dev dnsmasq dnsmasq-utils vlan bridge-utils ipset ifupdown ntp wpasupplicant mosquitto)
 else
-    INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv libssl-dev ipcalc sqlite3 dnsmasq lighttpd libffi-dev lighttpd dnsmasq dnsmasq-utils vlan bridge-utils ipset ifupdown ntp wpasupplicant mosquitto)
+    INSTALLER_DEPS=(build-essential gcc-multilib python3.7-dev python3.7-venv libssl-dev ipcalc sqlite3 dnsmasq nginx libffi-dev lighttpd dnsmasq dnsmasq-utils vlan bridge-utils ipset ifupdown ntp wpasupplicant mosquitto)
 fi
 
 DOCKER_DEPS=(docker-ce docker-ce-cli containerd.io docker-compose-plugin)
