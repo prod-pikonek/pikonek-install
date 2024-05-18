@@ -151,7 +151,7 @@ uninstall_lighttpd() {
 
 os_check() {
     local remote_os_domain valid_os valid_version detected_os_pretty detected_os detected_version display_warning
-    remote_os_domain="Ubuntu=18 Orange=18"
+    remote_os_domain="Ubuntu=18,20 Orange=18"
     remote_supported_arch="arm64 amd64 armhf"
     valid_os=false
     valid_version=false
@@ -2697,6 +2697,7 @@ main() {
 
     # if [[ "${NGINX_ENABLED}" == true ]]; then
     #     restart_service nginx
+    #     enable_service nginx
     # else
     #     printf "  %b Nginx is disabled, skipping service restart\\n" "${INFO}"
     # fi
