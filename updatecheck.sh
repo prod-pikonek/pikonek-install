@@ -49,7 +49,7 @@ if [[ "$2" == "remote" ]]; then
 
     if [ "$ARCH" == "amd64" ]; then
         GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s ${PIKONEK_AMD64} 2> /dev/null)")"
-    elif [ "$ARCH" == "amd64" ]; then
+    elif [ "$ARCH" == "arm64" ]; then
         GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s ${PIKONEK_ARM64} 2> /dev/null)")"
     else
         GITHUB_CORE_VERSION="$(json_extract tag_name "$(curl -s ${PIKONEK_ARMHF} 2> /dev/null)")"
