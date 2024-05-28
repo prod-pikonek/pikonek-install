@@ -2687,6 +2687,13 @@ main() {
         /usr/local/bin/pikonek -a -p "${pw}"
         # configure pihole docker
         configurePihole $pw
+    fi
+
+    if [[ ! -f "${PIKONEK_LOCAL_REPO}/vpn/docker-compose.yaml" ]]; then
+        # Add password to web UI if there is none
+        pw=""
+        # generate a random password
+        pw=$(tr -dc _A-Z-a-z-0-9 < /dev/urandom | head -c 8)
         # configure pivpn docker
         configurePiVPN $pw
     fi
