@@ -711,6 +711,36 @@ configurePihole() {
     printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
 }
 
+configurePiVPN() {
+    # create docker compose file
+    local str="Configuring pivpn docker"
+    printf "  %b %s...\\n" "${INFO}" "${str}"
+    {
+    echo -e "volumes:"
+    echo -e "   etc_wireguard:"
+    echo -e "services:"
+    echo -e "   pikonek-vpn:"
+    echo -e "       container_name: pikonek-vpn"
+    echo -e "       image: leond08/pikonek-vpn:prod"
+    echo -e "       ports:"
+    echo -e "           - '51820:51820/udp'"
+    echo -e "           - '51821:51821/tcp'"
+    echo -e "       environment:"
+    echo -e "           LANG=en"
+    echo -e "           WG_HOST=0.0.0.0" # change this in UI to public ip address
+    echo -e "           WG_DEFAULT_DNS: 10.8.0.1" # machine ip address
+    echo -e "           PASSWORD: ${1}"
+    echo -e "       volumes:"
+    echo -e "           - etc_wireguard:/etc/wireguard"
+    echo -e "       cap_add:"
+    echo -e "           - NET_ADMIN"
+    echo -e "           - SYS_MODULE"
+    echo -e "       restart: unless-stopped"
+    echo -e "       network_mode: host"
+    } > "${PIKONEK_LOCAL_REPO}/vpn/docker-compose.yaml"
+    printf "%b  %b %s...\\n" "${OVER}" "${TICK}" "${str}"
+}
+
 configureCaptivePortalRule() {
     local str="Configuring captive portal rule"
     printf "  %b %s...\\n" "${INFO}" "${str}"
@@ -2657,6 +2687,8 @@ main() {
         /usr/local/bin/pikonek -a -p "${pw}"
         # configure pihole docker
         configurePihole $pw
+        # configure pivpn docker
+        configurePiVPN $pw
     fi
 
     # shellcheck disable=SC1091
